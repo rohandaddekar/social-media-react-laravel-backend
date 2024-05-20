@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,11 +17,24 @@ Route::group(["prefix" => "auth"], function () {
 Route::group([
     "middleware" => ["auth:sanctum", "verified"],
 ], function () {
+    // Auth
     Route::group(["prefix" => "auth"], function () {
         Route::get("/sign-out", [AuthController::class, 'signOut']);
     });
 
+    // User
     Route::group(["prefix" => "users"], function () {
         Route::get("/me", [UserController::class, 'me']);
+        Route::post("/change-password", [UserController::class, 'changePassword']);
+        Route::patch("/update-profile", [UserController::class, 'updateProfile']);
+    });
+
+    // Post
+    Route::group(["prefix" => "posts"], function () {
+        Route::get("/", [PostController::class, 'index']);
+        Route::post("/", [PostController::class, 'store']);
+        Route::get("/{id}", [PostController::class, 'show']);
+        Route::patch("/{id}", [PostController::class, 'update']);
+        Route::delete("/{id}", [PostController::class, 'destroy']);
     });
 });
