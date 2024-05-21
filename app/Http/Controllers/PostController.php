@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PostEvent;
 use App\Http\Requests\PostStoreRequest;
 use App\Models\Post;
 use App\Traits\ApiResponse;
@@ -45,6 +46,8 @@ class PostController extends Controller
                 'images' => json_encode($request->images),
                 'user_id' => $user->id,
             ]);
+
+            PostEvent::dispatch($post);
 
             return $this->successResponse('post created successfully', $post, 201);
         } catch (\Exception $e) {

@@ -1,10 +1,12 @@
 <?php
 
+use App\Events\Test;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostLikeController;
 use App\Http\Controllers\UserController;
+use App\Models\Post;
 use Illuminate\Support\Facades\Route;
 
 // Public
@@ -15,6 +17,15 @@ Route::group(["prefix" => "auth"], function () {
     Route::post("/reset-password", [AuthController::class, 'resetPassword']);
     Route::post("/verify-email", [AuthController::class, 'verifyEmail']);
     Route::post("/verify-email/resend", [AuthController::class, 'verifyEmailResend']);
+});
+
+Route::post("/test-broadcast", function (){
+    $post = Post::first();
+    Test::dispatch($post);
+
+    return response()->json([
+        "success" => true
+    ]);
 });
 
 // Post
