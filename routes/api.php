@@ -5,6 +5,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+// Public
 Route::group(["prefix" => "auth"], function () {
     Route::post("/sign-up", [AuthController::class, 'signUp']);
     Route::post("/sign-in", [AuthController::class, 'signIn']);
@@ -14,6 +15,13 @@ Route::group(["prefix" => "auth"], function () {
     Route::post("/verify-email/resend", [AuthController::class, 'verifyEmailResend']);
 });
 
+// Post
+Route::group(["prefix" => "posts"], function () {
+    Route::get("/", [PostController::class, 'index']);
+    Route::get("/{id}", [PostController::class, 'show']);
+});
+
+// Protected
 Route::group([
     "middleware" => ["auth:sanctum", "verified"],
 ], function () {
@@ -31,9 +39,7 @@ Route::group([
 
     // Post
     Route::group(["prefix" => "posts"], function () {
-        Route::get("/", [PostController::class, 'index']);
         Route::post("/", [PostController::class, 'store']);
-        Route::get("/{id}", [PostController::class, 'show']);
         Route::patch("/{id}", [PostController::class, 'update']);
         Route::delete("/{id}", [PostController::class, 'destroy']);
     });
