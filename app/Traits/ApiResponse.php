@@ -28,4 +28,13 @@ trait ApiResponse{
 
     return response()->json($response, $code);
   }
+
+  public function formatException(\Exception $e){
+    return [
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'trace' => $e->getTrace(),
+    ];
+}
 }

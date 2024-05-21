@@ -21,7 +21,7 @@ class UserController extends Controller
 
             return $this->successResponse('successfully fetche user details', $user, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to fetche user details', $e, 500); 
+            return $this->errorResponse('failed to fetche user details', $this->formatException($e), 500); 
         }
     }
 
@@ -35,7 +35,20 @@ class UserController extends Controller
             
             return $this->successResponse('successfully fetched user posts', $posts, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to fetch user posts', $e, 500);
+            return $this->errorResponse('failed to fetch user posts', $this->formatException($e), 500);
+        }
+    }
+
+    /**
+     * get user liked posts
+     */
+    public function likedPosts(){
+        try {
+            $posts = Auth::user()->likedPosts;
+            
+            return $this->successResponse('successfully fetched user liked posts', $posts, 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('failed to fetch user liked posts', $this->formatException($e), 500);
         }
     }
 
@@ -58,7 +71,7 @@ class UserController extends Controller
 
             return $this->successResponse('successfully changed password', null, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to change password', $e, 500);
+            return $this->errorResponse('failed to change password', $this->formatException($e), 500);
         }
     }
 
@@ -78,7 +91,7 @@ class UserController extends Controller
 
             return $this->successResponse('successfully updated profile', $user, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to update profile', $e, 500);
+            return $this->errorResponse('failed to update profile', $this->formatException($e), 500);
         }
     }
 }

@@ -18,11 +18,15 @@ class PostController extends Controller
     public function index()
     {
         try {
-            $posts = Post::with(['user:id,first_name,last_name,email,profile_image'])->get();
+            $posts = Post::with([
+                        'user:id,first_name,last_name,email,profile_image', 
+                        'likes.user:id,first_name,last_name,email,profile_image', 
+                        'comments.user:id,first_name,last_name,email,profile_image'
+                    ])->get();
 
             return $this->successResponse('all posts fetched successfully', $posts, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to fetch all posts', $e, 500);
+            return $this->errorResponse('failed to fetch all posts', $this->formatException($e), 500);
         }
     }
 
@@ -44,7 +48,7 @@ class PostController extends Controller
 
             return $this->successResponse('post created successfully', $post, 201);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to create post', $e, 500);
+            return $this->errorResponse('failed to create post', $this->formatException($e), 500);
         }
     }
 
@@ -54,25 +58,27 @@ class PostController extends Controller
     public function show(string $id)
     {
         try {
-            $post = Post::with(['user:id,first_name,last_name,email,profile_image'])->find($id);
+            $post = Post::with([
+                        'user:id,first_name,last_name,email,profile_image', 
+                        'likes.user:id,first_name,last_name,email,profile_image', 
+                        'comments.user:id,first_name,last_name,email,profile_image'
+                    ])->find($id);
             if (!$post) {
                 return $this->errorResponse('post not found', null, 404);
             }
 
             return $this->successResponse('post fetched successfully', $post, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to fetch post', $e, 500);
+            return $this->errorResponse('failed to fetch post', $this->formatException($e), 500);
         }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(PostStoreRequest $request, string $id)
+    public function update(Request $request, string $id)
     {
         try {
-            $request->validated();
-
             $post = Post::find($id);
             if (!$post) {
                 return $this->errorResponse('post not found', null, 404);
@@ -83,7 +89,7 @@ class PostController extends Controller
 
             return $this->successResponse('post updated successfully', $post, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to update post', $e, 500);
+            return $this->errorResponse('failed to update post', $this->formatException($e), 500);
         }
     }
 
@@ -102,7 +108,7 @@ class PostController extends Controller
 
             return $this->successResponse('post deleted successfully', $post, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to delete post', $e, 500);
+            return $this->errorResponse('failed to delete post', $this->formatException($e), 500);
         }
     }
 }
