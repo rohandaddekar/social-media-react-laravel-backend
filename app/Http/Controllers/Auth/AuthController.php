@@ -86,7 +86,7 @@ class AuthController extends Controller
         try {
             Auth::user()->tokens()->delete();
 
-            return $this->successResponse('successfully signed out', [], 200);
+            return $this->successResponse('successfully signed out', null, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to sign out', $e, 500);
         }
@@ -100,7 +100,7 @@ class AuthController extends Controller
 
             $user = User::where('email', $request->email)->first();
             if(!$user){
-                return $this->errorResponse('user not found', [], 404);
+                return $this->errorResponse('user not found', null, 404);
             }
 
             $forgotPasswordToken = Str::random(64);
@@ -111,7 +111,7 @@ class AuthController extends Controller
 
             Mail::to($user->email)->send(new ForgotPasswordEmail($forgotPasswordToken));
 
-            return $this->successResponse('forgot password email sent successfully', [], 200);
+            return $this->successResponse('forgot password email sent successfully', null, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to send reset password email', $e, 500);
         }
@@ -123,21 +123,21 @@ class AuthController extends Controller
 
             $user = User::where('email', $request->email)->first();
             if(!$user){
-                return $this->errorResponse('user not found', [], 404);
+                return $this->errorResponse('user not found', null, 404);
             }
 
             $resetPasswordToken = PasswordResetToken::where('email', $request->email)
                                         ->where('token', $request->token)
                                         ->first();
             if(!$resetPasswordToken){
-                return $this->errorResponse('invalid token', [], 404);
+                return $this->errorResponse('invalid token', null, 404);
             }
 
             $user->password = Hash::make($request->password);
             $user->save();
             $resetPasswordToken->delete();
 
-            return $this->successResponse('password reset successfully', [], 200);
+            return $this->successResponse('password reset successfully', null, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to reset password', $e, 500);
         }
@@ -149,21 +149,21 @@ class AuthController extends Controller
 
             $user = User::where('email', $request->email)->first();
             if(!$user){
-                return $this->errorResponse('user not found', [], 404);
+                return $this->errorResponse('user not found', null, 404);
             }
 
             $userEmailToken = EmailVerificationToken::where('email', $request->email)
                                         ->where('token', $request->token)
                                         ->first();
             if(!$userEmailToken){
-                return $this->errorResponse('invalid token', [], 404);
+                return $this->errorResponse('invalid token', null, 404);
             }
 
             $user->email_verified_at = now();
             $user->save();
             $userEmailToken->delete();
 
-            return $this->successResponse('email verified successfully', [], 200);
+            return $this->successResponse('email verified successfully', null, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to send verification email', $e, 500);
         }
@@ -177,7 +177,7 @@ class AuthController extends Controller
 
             $user = User::where('email', $request->email)->first();
             if(!$user){
-                return $this->errorResponse('user not found', [], 404);
+                return $this->errorResponse('user not found', null, 404);
             }
 
             $emailVerificationToken = mt_rand(100000, 999999);
@@ -188,7 +188,7 @@ class AuthController extends Controller
 
             Mail::to($user->email)->send(new VerifyEmail($emailVerificationToken));
 
-            return $this->successResponse('verification email sent successfully', [], 200);
+            return $this->successResponse('verification email sent successfully', null, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to resend verification email', $e, 500);
         }

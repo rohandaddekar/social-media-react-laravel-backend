@@ -33,6 +33,7 @@ Route::group([
     // User
     Route::group(["prefix" => "users"], function () {
         Route::get("/me", [UserController::class, 'me']);
+        Route::get("/posts", [UserController::class, 'posts']);
         Route::post("/change-password", [UserController::class, 'changePassword']);
         Route::patch("/update-profile", [UserController::class, 'updateProfile']);
     });
