@@ -23,7 +23,9 @@ class PostController extends Controller
                         'user:id,first_name,last_name,email,profile_image', 
                         'likes.user:id,first_name,last_name,email,profile_image', 
                         'comments.user:id,first_name,last_name,email,profile_image'
-                    ])->get();
+                    ])
+                    ->orderBy('created_at', 'desc')
+                    ->get();
 
             return $this->successResponse('all posts fetched successfully', $posts, 200);
         } catch (\Exception $e) {

@@ -152,6 +152,10 @@ class AuthController extends Controller
                 return $this->errorResponse('user not found', null, 404);
             }
 
+            if($user->email_verified_at){
+                return $this->errorResponse('email already verified', null, 404);
+            }
+
             $userEmailToken = EmailVerificationToken::where('email', $request->email)
                                         ->where('token', $request->token)
                                         ->first();
@@ -178,6 +182,10 @@ class AuthController extends Controller
             $user = User::where('email', $request->email)->first();
             if(!$user){
                 return $this->errorResponse('user not found', null, 404);
+            }
+
+            if($user->email_verified_at){
+                return $this->errorResponse('email already verified', null, 404);
             }
 
             $emailVerificationToken = mt_rand(100000, 999999);
