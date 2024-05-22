@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\SignInRequest;
 use App\Http\Requests\SignUpRequest;
@@ -92,11 +93,9 @@ class AuthController extends Controller
         }
     }
 
-    public function forgotPassword(Request $request) {
+    public function forgotPassword(ForgotPasswordRequest $request) {
         try {
-            $request->validate([
-                'email' => ['required', 'email'],
-            ]);
+            $request->validated();
 
             $user = User::where('email', $request->email)->first();
             if(!$user){
@@ -121,16 +120,14 @@ class AuthController extends Controller
         try {
             $request->validated();
 
-            $user = User::where('email', $request->email)->first();
-            if(!$user){
-                return $this->errorResponse('user not found', null, 404);
-            }
-
-            $resetPasswordToken = PasswordResetToken::where('email', $request->email)
-                                        ->where('token', $request->token)
-                                        ->first();
+            $resetPasswordToken = PasswordResetToken::where('token', $request->token)->first();
             if(!$resetPasswordToken){
                 return $this->errorResponse('invalid token', null, 404);
+            }
+
+            $user = User::where('email', $resetPasswordToken->email)->first();
+            if(!$user){
+                return $this->errorResponse('user not found', null, 404);
             }
 
             $user->password = Hash::make($request->password);
