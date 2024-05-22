@@ -52,7 +52,7 @@ class AuthController extends Controller
 
             return $this->successResponse('successfully signed up', $data, 201);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to sign up', $e, 500);
+            return $this->errorResponse('failed to sign up', $this->formatException($e), 500);
         }
     }
 
@@ -78,7 +78,7 @@ class AuthController extends Controller
 
             return $this->successResponse('successfully signed in', $data, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to sign in', $e, 500);
+            return $this->errorResponse('failed to sign in', $this->formatException($e), 500);
         }
     }
 
@@ -88,7 +88,7 @@ class AuthController extends Controller
 
             return $this->successResponse('successfully signed out', null, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to sign out', $e, 500);
+            return $this->errorResponse('failed to sign out', $this->formatException($e), 500);
         }
     }
 
@@ -113,7 +113,7 @@ class AuthController extends Controller
 
             return $this->successResponse('forgot password email sent successfully', null, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to send reset password email', $e, 500);
+            return $this->errorResponse('failed to send reset password email', $this->formatException($e), 500);
         }
     }
 
@@ -139,7 +139,7 @@ class AuthController extends Controller
 
             return $this->successResponse('password reset successfully', null, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to reset password', $e, 500);
+            return $this->errorResponse('failed to reset password', $this->formatException($e), 500);
         }
     }
     
@@ -169,7 +169,7 @@ class AuthController extends Controller
 
             return $this->successResponse('email verified successfully', null, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to send verification email', $e, 500);
+            return $this->errorResponse('failed to send verification email', $this->formatException($e), 500);
         }
     }
     
@@ -198,7 +198,7 @@ class AuthController extends Controller
 
             return $this->successResponse('verification email sent successfully', null, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to resend verification email', $e, 500);
+            return $this->errorResponse('failed to resend verification email', $this->formatException($e), 500);
         }
     }
 }
