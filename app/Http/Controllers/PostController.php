@@ -6,12 +6,13 @@ use App\Events\PostEvent;
 use App\Http\Requests\PostStoreRequest;
 use App\Models\Post;
 use App\Traits\ApiResponse;
+use App\Traits\FileUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
-    use ApiResponse;
+    use ApiResponse, FileUpload;
 
     /**
      * Display a listing of the resource.
@@ -43,11 +44,17 @@ class PostController extends Controller
 
             $user = Auth::user();
 
+            $uploadedImages = [];
+            if($request->has('images')) {
+                $uploadedImages = $this->fileUpload($request->images);
+            }
+
             $post = Post::create([
                 'content' => $request->content,
-                'images' => json_encode($request->images),
+                'images' => json_encode($uploadedImages),
                 'user_id' => $user->id,
             ]);
+            $post->images = json_decode($post->images);
 
             PostEvent::dispatch($post);
 

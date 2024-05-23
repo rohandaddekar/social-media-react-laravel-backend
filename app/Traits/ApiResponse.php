@@ -36,5 +36,5 @@ trait ApiResponse{
         'line' => $e->getLine(),
         'trace' => $e->getTrace(),
     ];
-}
+  }
 }
