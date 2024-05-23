@@ -23,7 +23,7 @@ trait FileUpload{
       if($response->successful()){
         $uploadedFiles[] = $response->json()['secure_url'];
       } else {
-        throw new \Exception("Failed to upload image: " . $response->status() . " - " . $response->body());
+        throw new \Exception("Failed to upload files: " . $response->status() . " - " . $response->body());
       }
     }
 
