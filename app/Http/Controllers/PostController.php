@@ -28,6 +28,10 @@ class PostController extends Controller
                     ->orderBy('created_at', 'desc')
                     ->get();
 
+            foreach ($posts as $post) {
+                $post->images = json_decode($post->images);
+            }
+
             return $this->successResponse('all posts fetched successfully', $posts, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to fetch all posts', $this->formatException($e), 500);
@@ -79,6 +83,8 @@ class PostController extends Controller
                 return $this->errorResponse('post not found', null, 404);
             }
 
+            $post->images = json_decode($post->images);
+
             return $this->successResponse('post fetched successfully', $post, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to fetch post', $this->formatException($e), 500);
@@ -99,6 +105,8 @@ class PostController extends Controller
             $post->fill($request->only(['content', 'images']));
             $post->save();
 
+            $post->images = json_decode($post->images);
+
             return $this->successResponse('post updated successfully', $post, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to update post', $this->formatException($e), 500);
@@ -117,6 +125,8 @@ class PostController extends Controller
             }
 
             $post->delete();
+
+            $post->images = json_decode($post->images);
 
             return $this->successResponse('post deleted successfully', $post, 200);
         } catch (\Exception $e) {
