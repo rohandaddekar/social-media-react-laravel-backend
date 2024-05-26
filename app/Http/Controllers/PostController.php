@@ -105,9 +105,11 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(PostStoreRequest $request, string $id)
     {
         try {
+            $request->validated();
+
             $post = Post::find($id);
             if (!$post) {
                 return $this->errorResponse('post not found', null, 404);
