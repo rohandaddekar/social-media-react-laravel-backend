@@ -17,19 +17,26 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
+            $authUser = Auth::user();
+            $per_page = $request->per_page ?? 10;
+
             $posts = Post::with([
                         'user:id,first_name,last_name,email,profile_image', 
                         'likes.user:id,first_name,last_name,email,profile_image', 
                         'comments.user:id,first_name,last_name,email,profile_image'
                     ])
                     ->orderBy('created_at', 'desc')
-                    ->get();
+                    ->paginate($per_page);
+
+            $likedPostIds = $authUser ? $authUser->likedPosts()->pluck('post_id')->toArray() : [];
 
             foreach ($posts as $post) {
                 $post->images = json_decode($post->images);
+                $post->is_liked = in_array($post->id, $likedPostIds);
+                $post->is_owner = $authUser ? $post->user_id === $authUser->id : false;
             }
 
             return $this->successResponse('all posts fetched successfully', $posts, 200);
@@ -74,6 +81,7 @@ class PostController extends Controller
     public function show(string $id)
     {
         try {
+            $authUser = Auth::user();
             $post = Post::with([
                         'user:id,first_name,last_name,email,profile_image', 
                         'likes.user:id,first_name,last_name,email,profile_image', 
@@ -83,7 +91,10 @@ class PostController extends Controller
                 return $this->errorResponse('post not found', null, 404);
             }
 
+            $likedPostIds = $authUser ? $authUser->likedPosts()->pluck('post_id')->toArray() : [];
+
             $post->images = json_decode($post->images);
+            $post->is_liked = in_array($post->id, $likedPostIds);
 
             return $this->successResponse('post fetched successfully', $post, 200);
         } catch (\Exception $e) {

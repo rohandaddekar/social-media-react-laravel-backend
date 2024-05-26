@@ -28,12 +28,6 @@ Route::post("/test-broadcast", function (){
     ]);
 });
 
-// Post
-Route::group(["prefix" => "posts"], function () {
-    Route::get("/", [PostController::class, 'index']);
-    Route::get("/{id}", [PostController::class, 'show']);
-});
-
 // Protected
 Route::group([
     "middleware" => ["auth:sanctum", "verified"],
@@ -54,6 +48,8 @@ Route::group([
 
     // Post
     Route::group(["prefix" => "posts"], function () {
+        Route::get("/", [PostController::class, 'index']);
+        Route::get("/{id}", [PostController::class, 'show']);
         Route::post("/", [PostController::class, 'store']);
         Route::patch("/{id}", [PostController::class, 'update']);
         Route::delete("/{id}", [PostController::class, 'destroy']);
