@@ -9,6 +9,7 @@ use App\Traits\ApiResponse;
 use App\Traits\FileUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -50,6 +51,8 @@ class PostController extends Controller
      */
     public function store(PostStoreRequest $request)
     {
+        DB::beginTransaction();
+
         try {
             $request->validated();
 
@@ -65,12 +68,25 @@ class PostController extends Controller
                 'images' => json_encode($uploadedImages),
                 'user_id' => $user->id,
             ]);
+
+            $post->load([
+                'user:id,first_name,last_name,email,profile_image',
+                'likes.user:id,first_name,last_name,email,profile_image',
+                'comments.user:id,first_name,last_name,email,profile_image'
+            ]);
+    
             $post->images = json_decode($post->images);
+            $likedPostIds = $user ? $user->likedPosts()->pluck('post_id')->toArray() : [];
+            $post->is_liked = in_array($post->id, $likedPostIds);
+            $post->is_owner = $user ? $post->user_id === $user->id : false;
 
             PostEvent::dispatch($post);
 
+            DB::commit();
+
             return $this->successResponse('post created successfully', $post, 201);
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->errorResponse('failed to create post', $this->formatException($e), 500);
         }
     }
@@ -107,6 +123,8 @@ class PostController extends Controller
      */
     public function update(PostStoreRequest $request, string $id)
     {
+        DB::beginTransaction();
+
         try {
             $request->validated();
 
@@ -115,13 +133,27 @@ class PostController extends Controller
                 return $this->errorResponse('post not found', null, 404);
             }
 
-            $post->fill($request->only(['content', 'images']));
+            $oldImages = [];
+            if ($request->has('old_images')) {
+                $oldImages = $request->old_images;
+            }
+
+            $newUploadedImages = [];
+            if($request->has('images')) {
+                $newUploadedImages = $this->fileUpload($request->images);
+            }
+
+            $mergedImages = array_merge($oldImages, $newUploadedImages);
+            $post->images = !empty($mergedImages) ? json_encode($mergedImages) : json_encode([]);
+
+            $post->fill($request->only(['content']));
             $post->save();
 
-            $post->images = json_decode($post->images);
+            DB::commit();
 
             return $this->successResponse('post updated successfully', $post, 200);
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->errorResponse('failed to update post', $this->formatException($e), 500);
         }
     }

@@ -51,7 +51,7 @@ Route::group([
         Route::get("/", [PostController::class, 'index']);
         Route::get("/{id}", [PostController::class, 'show']);
         Route::post("/", [PostController::class, 'store']);
-        Route::patch("/{id}", [PostController::class, 'update']);
+        Route::post("/{id}", [PostController::class, 'update']);
         Route::delete("/{id}", [PostController::class, 'destroy']);
 
         // Like
