@@ -25,7 +25,7 @@ class PostController extends Controller
             $per_page = $request->per_page ?? 10;
 
             $posts = Post::with([
-                        'user:id,first_name,last_name,email,profile_image', 
+                        'user:id,first_name,last_name,email,profile_image,about_me', 
                         'likes.user:id,first_name,last_name,email,profile_image', 
                         'comments.user:id,first_name,last_name,email,profile_image'
                     ])
