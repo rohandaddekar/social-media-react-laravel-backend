@@ -22,16 +22,29 @@ class PostController extends Controller
     {
         try {
             $per_page = $request->per_page ?? 10;
+            $user_id = $request->user_id ?? null;
+            $scheduled = $request->scheduled ?? null;
 
-            $posts = Post::where('is_published', true)
-                        ->with([
-                            'user:id,first_name,last_name,email,profile_image,about_me', 
-                            'likes.user:id,first_name,last_name,email,profile_image', 
-                            'comments.user:id,first_name,last_name,email,profile_image'
-                        ])
-                        ->orderBy('publish_at', 'desc')
-                        ->paginate($per_page);
+            $query = Post::query();
 
+            if($user_id) {
+                $query->where('user_id', $user_id);
+            }
+
+            if($scheduled) {
+                $query->where('is_published', false)->where('user_id', Auth::user()->id);
+            } else {
+                $query->where('is_published', true);
+            }
+
+            $query->with([
+                        'user:id,first_name,last_name,email,profile_image,about_me', 
+                        'likes.user:id,first_name,last_name,email,profile_image', 
+                        'comments.user:id,first_name,last_name,email,profile_image'
+                    ])
+                    ->orderBy('publish_at', $scheduled ? 'asc' : 'desc');
+
+            $posts = $query->paginate($per_page);
 
             foreach ($posts as $post) {
                 $post->images = json_decode($post->images);
