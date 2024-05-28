@@ -31,6 +31,34 @@ class UserController extends Controller
     }
 
     /**
+     * get single user
+     */
+    public function show(String $id){
+        try {
+            $user = User::with([
+                            'posts' => function ($query) {
+                                $query->with([
+                                    'user:id,first_name,last_name,email,profile_image', 
+                                    'likes.user:id,first_name,last_name,email,profile_image', 
+                                    'comments.user:id,first_name,last_name,email,profile_image'
+                                ]);
+                            }
+                        ])->find($id);
+            if(!$user) {
+                return $this->errorResponse('user not found', null, 404);
+            }
+
+            foreach ($user->posts as $post) {
+                $post->images = json_decode($post->images);
+            }
+
+            return $this->successResponse('successfully fetched user details', $user, 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('failed to fetch user details', $this->formatException($e), 500); 
+        }
+    }
+
+    /**
      * get logged in user details
      */
     public function me(){
