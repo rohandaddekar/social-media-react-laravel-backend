@@ -20,8 +20,9 @@ class PostFactory extends Factory
     public function definition(): array
     {
         return [
-            'content' => $this->faker->paragraph(3, true),
+            'content' => $this->faker->paragraph(5, true),
             'publish_at' => now(),
+            'is_published' => true,
             'user_id' => $this->faker->numberBetween(1, 3),
         ];
     }

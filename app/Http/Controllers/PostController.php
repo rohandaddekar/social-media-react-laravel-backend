@@ -21,23 +21,20 @@ class PostController extends Controller
     public function index(Request $request)
     {
         try {
-            $authUser = Auth::user();
             $per_page = $request->per_page ?? 10;
 
-            $posts = Post::with([
-                        'user:id,first_name,last_name,email,profile_image,about_me', 
-                        'likes.user:id,first_name,last_name,email,profile_image', 
-                        'comments.user:id,first_name,last_name,email,profile_image'
-                    ])
-                    ->orderBy('created_at', 'desc')
-                    ->paginate($per_page);
+            $posts = Post::where('is_published', true)
+                        ->with([
+                            'user:id,first_name,last_name,email,profile_image,about_me', 
+                            'likes.user:id,first_name,last_name,email,profile_image', 
+                            'comments.user:id,first_name,last_name,email,profile_image'
+                        ])
+                        ->orderBy('publish_at', 'desc')
+                        ->paginate($per_page);
 
-            $likedPostIds = $authUser ? $authUser->likedPosts()->pluck('post_id')->toArray() : [];
 
             foreach ($posts as $post) {
                 $post->images = json_decode($post->images);
-                $post->is_liked = in_array($post->id, $likedPostIds);
-                $post->is_owner = $authUser ? $post->user_id === $authUser->id : false;
             }
 
             return $this->successResponse('all posts fetched successfully', $posts, 200);
@@ -63,10 +60,15 @@ class PostController extends Controller
                 $uploadedImages = $this->fileUpload($request->images);
             }
 
+            $publishAt = $request->publish_at ?? now();
+            $isPublished = !$request->has('publish_at') || $request->publish_at <= now();
+
             $post = Post::create([
                 'content' => $request->content,
                 'images' => json_encode($uploadedImages),
                 'user_id' => $user->id,
+                'publish_at' => $publishAt,
+                'is_published' => $isPublished,
             ]);
 
             $post->load([
@@ -76,11 +78,10 @@ class PostController extends Controller
             ]);
     
             $post->images = json_decode($post->images);
-            $likedPostIds = $user ? $user->likedPosts()->pluck('post_id')->toArray() : [];
-            $post->is_liked = in_array($post->id, $likedPostIds);
-            $post->is_owner = $user ? $post->user_id === $user->id : false;
 
-            PostEvent::dispatch($post);
+            if($post->is_published) {
+                PostEvent::dispatch($post);
+            }
 
             DB::commit();
 
@@ -97,7 +98,6 @@ class PostController extends Controller
     public function show(string $id)
     {
         try {
-            $authUser = Auth::user();
             $post = Post::with([
                         'user:id,first_name,last_name,email,profile_image', 
                         'likes.user:id,first_name,last_name,email,profile_image', 
@@ -107,10 +107,7 @@ class PostController extends Controller
                 return $this->errorResponse('post not found', null, 404);
             }
 
-            $likedPostIds = $authUser ? $authUser->likedPosts()->pluck('post_id')->toArray() : [];
-
             $post->images = json_decode($post->images);
-            $post->is_liked = in_array($post->id, $likedPostIds);
 
             return $this->successResponse('post fetched successfully', $post, 200);
         } catch (\Exception $e) {

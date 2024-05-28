@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->text('content');
             $table->json('images')->nullable();
-            $table->dateTime('publish_at')->default(now())->nullable();
+            $table->dateTime('publish_at')->nullable();
+            $table->boolean('is_published')->default(true);
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
