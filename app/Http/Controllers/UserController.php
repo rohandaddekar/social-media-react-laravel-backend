@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ChangePasswordRequest;
+use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,15 +14,32 @@ class UserController extends Controller
     use ApiResponse;
 
     /**
+     * get list of all users except logged in user
+     */
+    public function index(){
+        try {
+            $authUser = Auth::user();
+            $users = User::where('id', '!=', $authUser->id)
+                            ->where('email_verified_at', '!=', null)
+                            ->where('is_active', true)
+                            ->get();
+
+            return $this->successResponse('successfully fetched all users', $users, 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('failed to fetche all users', $this->formatException($e), 500); 
+        }
+    }
+
+    /**
      * get logged in user details
      */
     public function me(){
         try {
             $user = Auth::user();
 
-            return $this->successResponse('successfully fetche user details', $user, 200);
+            return $this->successResponse('successfully fetched user details', $user, 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('failed to fetche user details', $this->formatException($e), 500); 
+            return $this->errorResponse('failed to fetched user details', $this->formatException($e), 500); 
         }
     }
 

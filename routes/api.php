@@ -39,6 +39,7 @@ Route::group([
 
     // User
     Route::group(["prefix" => "users"], function () {
+        Route::get("/", [UserController::class, 'index']);
         Route::get("/me", [UserController::class, 'me']);
         Route::get("/posts", [UserController::class, 'posts']);
         Route::get("/posts/liked", [UserController::class, 'likedPosts']);
