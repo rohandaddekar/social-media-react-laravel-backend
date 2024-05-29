@@ -20,7 +20,7 @@ class UserController extends Controller
         try {
             $authUser = Auth::user();
             $users = User::where('id', '!=', $authUser->id)
-                            ->where('email_verified_at', '!=', null)
+                            ->whereNotNull('email_verified_at')
                             ->where('is_active', true)
                             ->get();
 
