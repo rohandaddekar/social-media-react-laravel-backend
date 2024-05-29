@@ -156,7 +156,15 @@ class PostController extends Controller
             $mergedImages = array_merge($oldImages, $newUploadedImages);
             $post->images = !empty($mergedImages) ? json_encode($mergedImages) : json_encode([]);
 
-            $post->fill($request->only(['content']));
+            $publishAt = $request->publish_at ?? now();
+            $isPublished = !$request->has('publish_at') || $request->publish_at <= now();
+
+            $post->fill([
+                'content' => $request->content,
+                'publish_at' => $publishAt,
+                'is_published' => $isPublished,
+            ]);
+
             $post->save();
 
             DB::commit();
