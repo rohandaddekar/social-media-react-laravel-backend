@@ -7,6 +7,7 @@ use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostLikeController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserFollowController;
 use Illuminate\Support\Facades\Route;
 
 // Public
@@ -46,6 +47,12 @@ Route::group([
         Route::get("/posts/liked", [UserController::class, 'likedPosts']);
         Route::post("/change-password", [UserController::class, 'changePassword']);
         Route::patch("/update-profile", [UserController::class, 'updateProfile']);
+
+        Route::post("/follow/send/{receiver_id}", [UserFollowController::class, 'sendFollowRequest']);
+        Route::post("/follow/accept/{sender_id}", [UserFollowController::class, 'acceptFollowRequest']);
+        Route::post("/follow/reject/{sender_id}", [UserFollowController::class, 'rejectFollowRequest']);
+        Route::post("/follow/remove/{sender_id}", [UserFollowController::class, 'removeFollowRequest']);
+        Route::post("/follow/cancel-or-unfollow/{receiver_id}", [UserFollowController::class, 'cancelOrUnFollowFollowRequest']);
     });
 
     // Post
