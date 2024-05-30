@@ -30,20 +30,20 @@ class UserController extends Controller
             foreach ($users as $user) {
                 $followStatus = 'none';
     
-                if ($user->sentFollowRequests->isNotEmpty()) {
-                    $request = $user->sentFollowRequests->first();
-                    if ($request->status === 'pending') {
+                $sentRequest = $user->sentFollowRequests()->where('receiver_id', $authUser->id)->first();
+                if ($sentRequest) {
+                    if ($sentRequest->status === 'pending') {
                         $followStatus = 'pending_received';
-                    } else if ($request->status === 'accepted') {
+                    } else if ($sentRequest->status === 'accepted') {
                         $followStatus = 'following';
                     }
                 }
-    
-                if ($user->receivedFollowRequests->isNotEmpty()) {
-                    $request = $user->receivedFollowRequests->first();
-                    if ($request->status === 'pending') {
+
+                $receivedRequest = $user->receivedFollowRequests()->where('sender_id', $authUser->id)->first();
+                if ($receivedRequest) {
+                    if ($receivedRequest->status === 'pending') {
                         $followStatus = 'pending_sent';
-                    } else if ($request->status === 'accepted') {
+                    } else if ($receivedRequest->status === 'accepted') {
                         $followStatus = 'follower';
                     }
                 }
