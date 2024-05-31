@@ -7,22 +7,23 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class UserFollowStatusEvent implements ShouldBroadcastNow
+class UserFollowStatusEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $followReq;
+    public $followStatus;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($followReq)
+    public function __construct($followReq, $followStatus)
     {
         $this->followReq = $followReq;
+        $this->followStatus = $followStatus;
     }
 
     /**
@@ -33,7 +34,8 @@ class UserFollowStatusEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('user-follow-status.'.$this->followReq->id),
+            new PrivateChannel('user-follow-status.'.$this->followReq->sender_id),
+            new PrivateChannel('user-follow-status.'.$this->followReq->receiver_id),
         ];
     }
 }

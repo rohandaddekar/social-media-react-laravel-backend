@@ -28,7 +28,10 @@ class UserFollowController extends Controller
                 'status' => 'pending'
             ]);
 
-            UserFollowStatusEvent::dispatch($followReq);
+            UserFollowStatusEvent::dispatch($followReq, [
+                'sender_follow_status' => "pending_sent",
+                'receiver_follow_status' => "pending_received"
+            ]);
 
             return $this->successResponse('follow request sent successfully', $followReq, 200);
         } catch (\Exception $e) {
