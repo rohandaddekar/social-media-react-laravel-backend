@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UserFollowStatusEvent;
 use App\Models\User;
 use App\Models\UserFollow;
 use App\Traits\ApiResponse;
@@ -26,6 +27,8 @@ class UserFollowController extends Controller
                 'receiver_id' => $receiver_id,
                 'status' => 'pending'
             ]);
+
+            UserFollowStatusEvent::dispatch($followReq);
 
             return $this->successResponse('follow request sent successfully', $followReq, 200);
         } catch (\Exception $e) {

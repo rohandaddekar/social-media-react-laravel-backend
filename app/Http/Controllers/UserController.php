@@ -22,48 +22,9 @@ class UserController extends Controller
             $users = User::where('id', '!=', $authUser->id)
                             ->whereNotNull('email_verified_at')
                             ->where('is_active', true)
-                            ->with(['sentFollowRequests', 'receivedFollowRequests'])
                             ->get();
-
-            $formattedUsers = [];
-
-            foreach ($users as $user) {
-                $followStatus = 'none';
     
-                $sentRequest = $user->sentFollowRequests()->where('receiver_id', $authUser->id)->first();
-                if ($sentRequest) {
-                    if ($sentRequest->status === 'pending') {
-                        $followStatus = 'pending_received';
-                    } else if ($sentRequest->status === 'accepted') {
-                        $followStatus = 'following';
-                    }
-                }
-
-                $receivedRequest = $user->receivedFollowRequests()->where('sender_id', $authUser->id)->first();
-                if ($receivedRequest) {
-                    if ($receivedRequest->status === 'pending') {
-                        $followStatus = 'pending_sent';
-                    } else if ($receivedRequest->status === 'accepted') {
-                        $followStatus = 'follower';
-                    }
-                }
-
-                $formattedUsers[] = [
-                    'id' => $user->id,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'email' => $user->email,
-                    'profile_image' => $user->profile_image,
-                    'profile_banner_image' => $user->profile_banner_image,
-                    'role' => $user->role,
-                    'is_active' => $user->is_active,
-                    'follow_status' => $followStatus,
-                ];
-            }
-
-            
-    
-            return $this->successResponse('Successfully fetched all users', $formattedUsers, 200);
+            return $this->successResponse('Successfully fetched all users', $users, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to fetche all users', $this->formatException($e), 500); 
         }

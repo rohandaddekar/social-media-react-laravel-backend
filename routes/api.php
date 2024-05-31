@@ -8,7 +8,9 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostLikeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserFollowController;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
+
 
 // Public
 Route::group(["prefix" => "auth"], function () {
@@ -75,3 +77,5 @@ Route::group([
         });
     });
 });
+
+Broadcast::routes(["middleware" => ["auth:sanctum"]]);

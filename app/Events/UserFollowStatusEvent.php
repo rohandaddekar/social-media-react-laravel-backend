@@ -11,18 +11,18 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class PostEvent implements ShouldBroadcastNow
+class UserFollowStatusEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $post;
+    public $followReq;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($post)
+    public function __construct($followReq)
     {
-        $this->post = $post;
+        $this->followReq = $followReq;
     }
 
     /**
@@ -33,7 +33,7 @@ class PostEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new Channel('post-channel'),
+            new PrivateChannel('user-follow-status.'.$this->followReq->id),
         ];
     }
 }

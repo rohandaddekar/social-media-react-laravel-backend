@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -39,6 +40,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
+    protected $appends = ['follow_status'];
+
     /**
      * The attributes that should be cast.
      *
@@ -67,5 +70,32 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function receivedFollowRequests(){
         return $this->hasMany(UserFollow::class, 'receiver_id');
+    }
+
+    public function getFollowStatusAttribute() {
+        $authUser = Auth::user();
+        if (!$authUser) {
+            return 'none';
+        }
+
+        $sentRequest = $this->sentFollowRequests()->where('receiver_id', $authUser->id)->first();
+        if ($sentRequest) {
+            if ($sentRequest->status === 'pending') {
+                return 'pending_received';
+            } elseif ($sentRequest->status === 'accepted') {
+                return 'following';
+            }
+        }
+
+        $receivedRequest = $this->receivedFollowRequests()->where('sender_id', $authUser->id)->first();
+        if ($receivedRequest) {
+            if ($receivedRequest->status === 'pending') {
+                return 'pending_sent';
+            } elseif ($receivedRequest->status === 'accepted') {
+                return 'follower';
+            }
+        }
+
+        return 'none';
     }
 }
