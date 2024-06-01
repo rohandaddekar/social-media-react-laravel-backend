@@ -6,12 +6,13 @@ use App\Events\UserFollowStatusEvent;
 use App\Models\User;
 use App\Models\UserFollow;
 use App\Traits\ApiResponse;
+use App\Traits\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class UserFollowController extends Controller
 {
-    use ApiResponse;
+    use ApiResponse, Notification;
 
     public function sendFollowRequest(Request $request, $receiver_id){
         try {
@@ -32,6 +33,11 @@ class UserFollowController extends Controller
                 'sender_follow_status' => "pending_sent",
                 'receiver_follow_status' => "pending_received"
             ]);
+
+            $this->createAndDispatchNotification('user-follow', [
+                'message' => $sender_user->first_name . " " . $sender_user->last_name . ' sent you a follow request',
+                'user' => $sender_user
+            ], $receiver_id);
 
             return $this->successResponse('follow request sent successfully', $followReq, 200);
         } catch (\Exception $e) {
@@ -59,6 +65,11 @@ class UserFollowController extends Controller
                 'receiver_follow_status' => "following"
             ]);
 
+            $this->createAndDispatchNotification('user-follow', [
+                'message' => $receiver_user->first_name . " " . $receiver_user->last_name . ' accepted your follow request',
+                'user' => $receiver_user
+            ], $sender_id);
+
             return $this->successResponse('follow request accepted successfully', $followReq, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to accept follow request', $this->formatException($e), 500); 
@@ -81,6 +92,11 @@ class UserFollowController extends Controller
                 'sender_follow_status' => "none",
                 'receiver_follow_status' => "none"
             ]);
+
+            $this->createAndDispatchNotification('user-follow', [
+                'message' => $receiver_user->first_name . " " . $receiver_user->last_name . ' rejected your follow request',
+                'user' => $receiver_user
+            ], $sender_id);
             
             $followReq->delete();
 
