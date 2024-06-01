@@ -52,26 +52,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'password' => 'hashed',
     ];
 
-    public function posts(){
-        return $this->hasMany(Post::class);
-    }
-
-    public function likedPosts(){
-        return $this->belongsToMany(Post::class, 'post_likes', 'user_id', 'post_id');
-    }
-
-    public function comments(){
-        return $this->hasMany(PostComment::class);
-    }
-
-    public function sentFollowRequests(){
-        return $this->hasMany(UserFollow::class, 'sender_id');
-    }
-
-    public function receivedFollowRequests(){
-        return $this->hasMany(UserFollow::class, 'receiver_id');
-    }
-
     public function getFollowStatusAttribute() {
         $authUser = Auth::user();
         if (!$authUser) {
@@ -97,5 +77,29 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return 'none';
+    }
+
+    public function posts(){
+        return $this->hasMany(Post::class);
+    }
+
+    public function likedPosts(){
+        return $this->belongsToMany(Post::class, 'post_likes', 'user_id', 'post_id');
+    }
+
+    public function comments(){
+        return $this->hasMany(PostComment::class);
+    }
+
+    public function sentFollowRequests(){
+        return $this->hasMany(UserFollow::class, 'sender_id');
+    }
+
+    public function receivedFollowRequests(){
+        return $this->hasMany(UserFollow::class, 'receiver_id');
+    }
+
+    public function notifications(){
+        return $this->hasMany(Notification::class);
     }
 }

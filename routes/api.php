@@ -3,6 +3,7 @@
 use App\Events\Test;
 use App\Models\Post;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostLikeController;
@@ -75,6 +76,14 @@ Route::group([
             Route::patch("/{id}", [PostCommentController::class, 'update']);
             Route::delete("/{id}", [PostCommentController::class, 'destroy']);
         });
+    });
+
+    // Notifications
+    Route::group(["prefix" => "notifications"], function () {
+        Route::get("/", [NotificationController::class, 'index']);
+        // Route::get("/{id}", [NotificationController::class, 'show']);
+        // Route::patch("/{id}", [NotificationController::class, 'update']);
+        // Route::delete("/{id}", [NotificationController::class, 'destroy']);
     });
 });
 
