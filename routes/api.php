@@ -81,6 +81,8 @@ Route::group([
     // Notifications
     Route::group(["prefix" => "notifications"], function () {
         Route::get("/", [NotificationController::class, 'index']);
+        Route::get("/mark-as-read/{id}", [NotificationController::class, 'markAsRead']);
+        Route::get("/mark-all-as-read", [NotificationController::class, 'markAllAsRead']);
         // Route::get("/{id}", [NotificationController::class, 'show']);
         // Route::patch("/{id}", [NotificationController::class, 'update']);
         // Route::delete("/{id}", [NotificationController::class, 'destroy']);
