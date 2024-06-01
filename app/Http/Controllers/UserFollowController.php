@@ -54,6 +54,11 @@ class UserFollowController extends Controller
             $followReq->status = 'accepted';
             $followReq->save();
 
+            UserFollowStatusEvent::dispatch($followReq, [
+                'sender_follow_status' => "follower",
+                'receiver_follow_status' => "following"
+            ]);
+
             return $this->successResponse('follow request accepted successfully', $followReq, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to accept follow request', $this->formatException($e), 500); 
@@ -72,6 +77,11 @@ class UserFollowController extends Controller
                                     ->first();
             if(!$followReq) return $this->errorResponse('request not found', null, 404);
 
+            UserFollowStatusEvent::dispatch($followReq, [
+                'sender_follow_status' => "none",
+                'receiver_follow_status' => "none"
+            ]);
+            
             $followReq->delete();
 
             return $this->successResponse('follow request rejected successfully', $followReq, 200);
@@ -92,6 +102,11 @@ class UserFollowController extends Controller
                                     ->first();
             if(!$followReq) return $this->errorResponse('request not found', null, 404);
 
+            UserFollowStatusEvent::dispatch($followReq, [
+                'sender_follow_status' => "none",
+                'receiver_follow_status' => "none"
+            ]);
+
             $followReq->delete();
 
             return $this->successResponse('follow request removed successfully', $followReq, 200);
@@ -111,6 +126,11 @@ class UserFollowController extends Controller
                                     ->where('receiver_id', $receiver_id)
                                     ->first();
             if(!$followReq) return $this->errorResponse('request not found', null, 404);
+
+            UserFollowStatusEvent::dispatch($followReq, [
+                'sender_follow_status' => "none",
+                'receiver_follow_status' => "none"
+            ]);
 
             $followReq->delete();
 
