@@ -86,6 +86,29 @@ class NotificationController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $notification = Notification::find($id);
+            if (!$notification) return $this->errorResponse('notification not found', null, 404);
+
+            $notification->delete();
+            return $this->successResponse('notification deleted successfully', null, 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('failed to delete notification', $this->formatException($e), 500);
+        }
+    }
+
+    public function clearAll()
+    {
+        try {
+            $notifications = Auth::user()->notifications;
+
+            foreach ($notifications as $notification) {
+                $notification->delete();
+            }
+
+            return $this->successResponse('all notifications deleted successfully', null, 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('failed to delete notification', $this->formatException($e), 500);
+        }
     }
 }
