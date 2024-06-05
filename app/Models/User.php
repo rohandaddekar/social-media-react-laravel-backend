@@ -40,7 +40,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
-    protected $appends = ['follow_status'];
+    protected $appends = [
+        'follow_status', 
+        'followers', 
+        'followings'
+    ];
 
     /**
      * The attributes that should be cast.
@@ -77,6 +81,14 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return 'none';
+    }
+
+    public function getFollowersAttribute() {
+        return $this->receivedFollowRequests()->where('status', 'accepted')->count();
+    }
+    
+    public function getFollowingsAttribute() {
+        return $this->sentFollowRequests()->where('status', 'accepted')->count();
     }
 
     public function posts(){

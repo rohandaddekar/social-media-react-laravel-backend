@@ -155,4 +155,30 @@ class UserFollowController extends Controller
             return $this->errorResponse('failed to unfollow or cancel follow request', $this->formatException($e), 500); 
         }
     }
+    
+    public function followers($user_id){
+        try {
+            $user = User::find($user_id);
+            if(!$user) return $this->errorResponse('user not found', null, 404);
+
+            $followers = $user->receivedFollowRequests->where('status', 'accepted');
+
+            return $this->successResponse('successfully fetched followers', $followers, 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('failed to fetch followers', $this->formatException($e), 500); 
+        }
+    }
+    
+    public function followings($user_id){
+        try {
+            $user = User::find($user_id);
+            if(!$user) return $this->errorResponse('user not found', null, 404);
+
+            $followings = $user->sentFollowRequests->where('status', 'accepted');
+
+            return $this->successResponse('successfully fetched followings', $followings, 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('failed to fetch followings', $this->formatException($e), 500); 
+        }
+    }
 }
