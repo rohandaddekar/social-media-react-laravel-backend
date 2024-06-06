@@ -43,7 +43,9 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $appends = [
         'follow_status', 
         'followers', 
-        'followings'
+        'followings',
+        'sent_requests',
+        'received_requests',
     ];
 
     /**
@@ -89,6 +91,26 @@ class User extends Authenticatable implements MustVerifyEmail
     
     public function getFollowingsAttribute() {
         return $this->sentFollowRequests()->where('status', 'accepted')->count();
+    }
+    
+    public function getSentRequestsAttribute() {
+        $authUser = Auth::user();
+
+        if($authUser && $authUser->id === $this->id){
+            return $this->sentFollowRequests()->where('status', 'pending')->count();
+        }
+
+        return null;
+    }
+    
+    public function getReceivedRequestsAttribute() {
+        $authUser = Auth::user();
+
+        if($authUser && $authUser->id === $this->id){
+            return $this->receivedFollowRequests()->where('status', 'pending')->count();
+        }
+
+        return null;
     }
 
     public function posts(){

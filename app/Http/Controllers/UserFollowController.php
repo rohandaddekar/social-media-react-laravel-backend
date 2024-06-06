@@ -156,29 +156,103 @@ class UserFollowController extends Controller
         }
     }
     
-    public function followers($user_id){
+    public function followers($user_id) {
         try {
             $user = User::find($user_id);
-            if(!$user) return $this->errorResponse('user not found', null, 404);
-
-            $followers = $user->receivedFollowRequests->where('status', 'accepted');
-
-            return $this->successResponse('successfully fetched followers', $followers, 200);
+            if (!$user) return $this->errorResponse('user not found', null, 404);
+    
+            $followers = $user->receivedFollowRequests()
+                              ->where('status', 'accepted')
+                              ->with('sender')
+                              ->get();
+    
+            $followersDetails = $followers->map(function($follower) {
+                return [
+                    'id' => $follower->id,
+                    'user' => $follower->sender,  
+                    'status' => $follower->status,
+                    'created_at' => $follower->created_at,
+                    'updated_at' => $follower->updated_at,
+                ];
+            });
+    
+            return $this->successResponse('successfully fetched followers', $followersDetails, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to fetch followers', $this->formatException($e), 500); 
         }
     }
     
-    public function followings($user_id){
+    public function followings($user_id) {
         try {
             $user = User::find($user_id);
-            if(!$user) return $this->errorResponse('user not found', null, 404);
-
-            $followings = $user->sentFollowRequests->where('status', 'accepted');
-
-            return $this->successResponse('successfully fetched followings', $followings, 200);
+            if (!$user) return $this->errorResponse('user not found', null, 404);
+    
+            $followings = $user->sentFollowRequests()
+                               ->where('status', 'accepted')
+                               ->with('receiver')
+                               ->get();
+    
+            $followingsDetails = $followings->map(function($following) {
+                return [
+                    'id' => $following->id,
+                    'user' => $following->receiver,  
+                    'status' => $following->status,
+                    'created_at' => $following->created_at,
+                    'updated_at' => $following->updated_at,
+                ];
+            });
+    
+            return $this->successResponse('successfully fetched followings', $followingsDetails, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to fetch followings', $this->formatException($e), 500); 
+        }
+    }  
+    
+    public function sentRequests(){
+        try {
+            $authUser = Auth::user();
+    
+            $sentRequests = $authUser->sentFollowRequests()
+                                         ->where('status', 'pending')
+                                     ->with('receiver')
+                                     ->get()
+                                     ->map(function($request) {
+                                         return [
+                                             'id' => $request->id,
+                                             'user' => $request->receiver,
+                                             'status' => $request->status,
+                                             'created_at' => $request->created_at,
+                                             'updated_at' => $request->updated_at,
+                                         ];
+                                     });
+    
+            return $this->successResponse('successfully fetched sent requests', $sentRequests, 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('failed to fetch sent requests', $this->formatException($e), 500); 
+        }
+    }
+    
+    public function receivedRequests(){
+        try {
+            $authUser = Auth::user();
+    
+            $receivedRequests = $authUser->receivedFollowRequests()
+                                         ->where('status', 'pending')
+                                         ->with('sender')
+                                         ->get()
+                                         ->map(function($request) {
+                                             return [
+                                                 'id' => $request->id,
+                                                 'user' => $request->sender,
+                                                 'status' => $request->status,
+                                                 'created_at' => $request->created_at,
+                                                 'updated_at' => $request->updated_at,
+                                             ];
+                                         });
+    
+            return $this->successResponse('successfully fetched received requests', $receivedRequests, 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('failed to fetch received requests', $this->formatException($e), 500); 
         }
     }
 }

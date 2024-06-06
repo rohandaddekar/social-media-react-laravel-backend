@@ -58,6 +58,8 @@ Route::group([
         Route::post("/follow/cancel-or-unfollow/{receiver_id}", [UserFollowController::class, 'cancelOrUnFollowFollowRequest']);
         Route::get('/followers/{user_id}', [UserFollowController::class, 'followers']);
         Route::get('/followings/{user_id}', [UserFollowController::class, 'followings']);
+        Route::get('/requests/sent', [UserFollowController::class, 'sentRequests']);
+        Route::get('/requests/received', [UserFollowController::class, 'receivedRequests']);
     });
 
     // Post
