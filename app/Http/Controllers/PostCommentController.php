@@ -52,7 +52,7 @@ class PostCommentController extends Controller
             ]);
 
             $comment->load('user:id,first_name,last_name,email,profile_image');
-            PostCommentEvent::dispatch($comment);
+            PostCommentEvent::dispatch($comment, 'created');
 
             DB::commit();
 
@@ -88,6 +88,8 @@ class PostCommentController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        DB::beginTransaction();
+
         try {
             $comment = PostComment::find($id);
             if (!$comment) {
@@ -97,8 +99,13 @@ class PostCommentController extends Controller
             $comment->fill($request->only(['comment']));
             $comment->save();
 
+            PostCommentEvent::dispatch($comment, 'updated');
+
+            DB::commit();
+
             return $this->successResponse('comment updated successfully', $comment, 200);
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->errorResponse('failed to update comment', $this->formatException($e), 500);
         }
     }
@@ -108,16 +115,22 @@ class PostCommentController extends Controller
      */
     public function destroy(string $id)
     {
+        DB::beginTransaction();
+
         try {
             $comment = PostComment::find($id);
             if (!$comment) {
                 return $this->errorResponse('comment not found', null, 404);
             }
 
+            PostCommentEvent::dispatch($comment, 'deleted');
             $comment->delete();
+
+            DB::commit();
 
             return $this->successResponse('comment deleted successfully', $comment, 200);
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->errorResponse('failed to delete comment', $this->formatException($e), 500);
         }
     }

@@ -14,14 +14,15 @@ class PostCommentEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $comment;
+    public $comment, $type;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($comment)
+    public function __construct($comment, $type)
     {
         $this->comment = $comment;
+        $this->type = $type;
     }
 
     /**
