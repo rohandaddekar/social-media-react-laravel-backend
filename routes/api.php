@@ -44,8 +44,8 @@ Route::group([
     // User
     Route::group(["prefix" => "users"], function () {
         Route::get("/", [UserController::class, 'index']);
-        Route::get("/{id}", [UserController::class, 'show']);
         Route::get("/me", [UserController::class, 'me']);
+        Route::get("/{id}", [UserController::class, 'show']);
         Route::get("/posts", [UserController::class, 'posts']);
         Route::get("/posts/liked", [UserController::class, 'likedPosts']);
         Route::post("/change-password", [UserController::class, 'changePassword']);

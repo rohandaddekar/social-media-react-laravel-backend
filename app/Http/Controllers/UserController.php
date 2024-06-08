@@ -16,14 +16,25 @@ class UserController extends Controller
     /**
      * get list of all users except logged in user
      */
-    public function index(){
+    public function index(Request $request){
         try {
             $authUser = Auth::user();
-            $users = User::where('id', '!=', $authUser->id)
+            $query = User::where('id', '!=', $authUser->id)
                             ->whereNotNull('email_verified_at')
-                            ->where('is_active', true)
-                            ->get();
+                            ->where('is_active', true);
+
+            if ($request->query('showSuggested')) {
+                $followingIds = $authUser->sentFollowRequests()->where('status', 'accepted')->pluck('receiver_id')->toArray();
+                $followerIds = $authUser->receivedFollowRequests()->where('status', 'accepted')->pluck('sender_id')->toArray();
+
+                $excludedIds = array_merge($followingIds, $followerIds);
     
+                $query->whereNotIn('id', $excludedIds);
+                $users = $query->inRandomOrder()->limit(5)->get();
+            } else {
+                $users = $query->get();
+            }
+
             return $this->successResponse('Successfully fetched all users', $users, 200);
         } catch (\Exception $e) {
             return $this->errorResponse('failed to fetche all users', $this->formatException($e), 500); 
