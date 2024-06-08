@@ -14,14 +14,15 @@ class PostEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $post;
+    public $post, $type;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($post)
+    public function __construct($post, $type)
     {
         $this->post = $post;
+        $this->type = $type;
     }
 
     /**
@@ -32,7 +33,7 @@ class PostEvent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('post-channel'),
+            new PrivateChannel('post'),
         ];
     }
 }

@@ -93,7 +93,7 @@ class PostController extends Controller
             $post->images = json_decode($post->images);
 
             if($post->is_published) {
-                PostEvent::dispatch($post);
+                PostEvent::dispatch($post, 'created');
             }
 
             DB::commit();
@@ -166,6 +166,15 @@ class PostController extends Controller
             ]);
 
             $post->save();
+            
+            $post->load([
+                'user:id,first_name,last_name,email,profile_image',
+                'likes.user:id,first_name,last_name,email,profile_image',
+                'comments.user:id,first_name,last_name,email,profile_image'
+            ]);
+            $post->images = json_decode($post->images);
+
+            PostEvent::dispatch($post, 'updated');
 
             DB::commit();
 
@@ -181,18 +190,23 @@ class PostController extends Controller
      */
     public function destroy(string $id)
     {
+        DB::beginTransaction();
+
         try {
             $post = Post::find($id);
             if (!$post) {
                 return $this->errorResponse('post not found', null, 404);
             }
 
+            PostEvent::dispatch($post, 'deleted');
+
             $post->delete();
 
-            $post->images = json_decode($post->images);
+            DB::commit();
 
             return $this->successResponse('post deleted successfully', $post, 200);
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->errorResponse('failed to delete post', $this->formatException($e), 500);
         }
     }
