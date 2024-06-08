@@ -75,6 +75,7 @@ Route::group([
 
         // Comment
         Route::group(["prefix" => "comments"], function () {
+            Route::get("/all/{post_id}", [PostCommentController::class, 'index']);
             Route::post("/{post_id}", [PostCommentController::class, 'store']);
             Route::get("/{id}", [PostCommentController::class, 'show']);
             Route::patch("/{id}", [PostCommentController::class, 'update']);

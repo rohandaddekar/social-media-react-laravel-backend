@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PostCommentEvent;
 use App\Http\Requests\PostCommentStoreRequest;
 use App\Models\Post;
 use App\Models\PostComment;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PostCommentController extends Controller
 {
@@ -16,9 +18,18 @@ class PostCommentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($post_id)
     {
-        //
+        try {
+            $comments = PostComment::with(['user:id,first_name,last_name,email,profile_image'])
+                                    ->where('post_id', $post_id)
+                                    ->orderBy('created_at', 'desc')
+                                    ->get();
+
+            return $this->successResponse('all comment fetched successfully', $comments, 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('failed to fetch all comment', $this->formatException($e), 500);
+        }
     }
 
     /**
@@ -26,6 +37,8 @@ class PostCommentController extends Controller
      */
     public function store(PostCommentStoreRequest $request, $post_id)
     {
+        DB::beginTransaction();
+
         try {
             $request->validated();
 
@@ -38,8 +51,14 @@ class PostCommentController extends Controller
                 'user_id' => Auth::user()->id
             ]);
 
+            $comment->load('user:id,first_name,last_name,email,profile_image');
+            PostCommentEvent::dispatch($comment);
+
+            DB::commit();
+
             return $this->successResponse('comment added successfully', $comment, 201);
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->errorResponse('failed to add comment', $this->formatException($e), 500);
         }
     }
