@@ -7,13 +7,14 @@ use App\Http\Requests\PostCommentStoreRequest;
 use App\Models\Post;
 use App\Models\PostComment;
 use App\Traits\ApiResponse;
+use App\Traits\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PostCommentController extends Controller
 {
-    use ApiResponse;
+    use ApiResponse, Notification;
 
     /**
      * Display a listing of the resource.
@@ -51,8 +52,17 @@ class PostCommentController extends Controller
                 'user_id' => Auth::user()->id
             ]);
 
-            $comment->load('user:id,first_name,last_name,email,profile_image');
+            $comment->load(['user:id,first_name,last_name,email,profile_image', 'post.user:id,first_name,last_name,email,profile_image']);
+
             PostCommentEvent::dispatch($comment, 'created');
+
+            if($comment->post->user_id !== Auth::user()->id) {
+                $this->createAndDispatchNotification('post', [
+                    'message' => $comment->user->first_name . " " . $comment->user->last_name . ' added a comment to your post.',
+                    'user' => $comment->user,
+                    'post_id' => $comment->post_id
+                ], $comment->post->user_id);
+            }
 
             DB::commit();
 
@@ -99,6 +109,7 @@ class PostCommentController extends Controller
             $comment->fill($request->only(['comment']));
             $comment->save();
 
+            $comment->load('user:id,first_name,last_name,email,profile_image');
             PostCommentEvent::dispatch($comment, 'updated');
 
             DB::commit();
