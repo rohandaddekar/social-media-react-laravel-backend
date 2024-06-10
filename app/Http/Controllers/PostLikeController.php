@@ -8,12 +8,15 @@ use App\Traits\ApiResponse;
 use App\Traits\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PostLikeController extends Controller
 {
     use ApiResponse, Notification;
 
     public function likeUnlike(Request $request, $post_id){
+        DB::beginTransaction();
+
         try {
             $post = Post::find($post_id);
             if(!$post) return $this->errorResponse('post not found', null, 404);
@@ -34,8 +37,11 @@ class PostLikeController extends Controller
 
             PostLikeEvent::dispatch($post);
 
+            DB::commit();
+
             return $this->successResponse("successfully {$action} post", $result, 200);
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->errorResponse("failed to toggle post like", $this->formatException($e), 500);
         }
     }
