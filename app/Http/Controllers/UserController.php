@@ -139,11 +139,9 @@ class UserController extends Controller
         try {
             $user = Auth::user();
 
-            $user->fill($request->only([
-                'first_name',
-                'last_name',
-                'profile_image',
-            ]));
+            $user->first_name = $request->filled('first_name') ? $request->first_name : $user->first_name;
+            $user->last_name = $request->filled('last_name') ? $request->last_name : $user->last_name;
+            $user->about_me = $request->filled('about_me') ? $request->about_me : $user->about_me;
             $user->save();
 
             return $this->successResponse('successfully updated profile', $user, 200);
