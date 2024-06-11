@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Models\User;
 use App\Traits\ApiResponse;
+use App\Traits\FileUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    use ApiResponse;
+    use ApiResponse, FileUpload;
 
     /**
      * get list of all users except logged in user
@@ -139,9 +140,25 @@ class UserController extends Controller
         try {
             $user = Auth::user();
 
+            $newProfileImage = null;
+            $newProfileBannerImage = null;
+
+            if($request->hasFile('profile_image')) {
+                $uploadedImages = $this->fileUpload([$request->file('profile_image')]);
+                $newProfileImage = $uploadedImages[0] ?? null;
+            }
+
+            if($request->hasFile('profile_banner_image')) {
+                $uploadedImages = $this->fileUpload([$request->file('profile_banner_image')]);
+                $newProfileBannerImage = $uploadedImages[0] ?? null;
+            }
+
             $user->first_name = $request->filled('first_name') ? $request->first_name : $user->first_name;
             $user->last_name = $request->filled('last_name') ? $request->last_name : $user->last_name;
             $user->about_me = $request->filled('about_me') ? $request->about_me : $user->about_me;
+            $user->profile_image = $newProfileImage ?: ($user->profile_image ?: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png");
+            $user->profile_banner_image = $newProfileBannerImage ?: ($user->profile_banner_image ?: "https://res.cloudinary.com/omaha-code/image/upload/ar_4:3,c_fill,dpr_1.0,e_art:quartz,g_auto,h_396,q_auto:best,t_Linkedin_official,w_1584/v1561576558/mountains-1412683_1280.png");
+
             $user->save();
 
             return $this->successResponse('successfully updated profile', $user, 200);

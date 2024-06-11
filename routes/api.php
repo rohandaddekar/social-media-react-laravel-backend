@@ -49,7 +49,7 @@ Route::group([
         Route::get("/posts", [UserController::class, 'posts']);
         Route::get("/posts/liked", [UserController::class, 'likedPosts']);
         Route::post("/change-password", [UserController::class, 'changePassword']);
-        Route::patch("/update-profile", [UserController::class, 'updateProfile']);
+        Route::post("/update-profile", [UserController::class, 'updateProfile']);
 
         Route::post("/follow/send/{receiver_id}", [UserFollowController::class, 'sendFollowRequest']);
         Route::post("/follow/accept/{sender_id}", [UserFollowController::class, 'acceptFollowRequest']);
