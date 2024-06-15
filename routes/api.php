@@ -3,6 +3,7 @@
 use App\Events\Test;
 use App\Models\Post;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\PostController;
@@ -90,6 +91,15 @@ Route::group([
         Route::get("/mark-all-as-read", [NotificationController::class, 'markAllAsRead']);
         Route::delete("/clear-all", [NotificationController::class, 'clearAll']);
         Route::delete("/{id}", [NotificationController::class, 'destroy']);
+    });
+
+    // Chats
+    Route::group(["prefix" => "chats"], function () {
+        Route::get("/users", [ChatController::class, 'allChatUsers']);
+        Route::get("/messages/{receiver_id}", [ChatController::class, 'messages']);
+        Route::post("/messages", [ChatController::class, 'store']);
+        Route::put("/messages/{id}", [ChatController::class, 'update']);
+        Route::delete("/messages/{id}", [ChatController::class, 'destroy']);
     });
 });
 
