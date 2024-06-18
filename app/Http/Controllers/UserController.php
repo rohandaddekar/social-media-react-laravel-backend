@@ -32,9 +32,21 @@ class UserController extends Controller
     
                 $query->whereNotIn('id', $excludedIds);
                 $users = $query->inRandomOrder()->limit(5)->get();
-            } else {
+            }  
+
+            if ($request->query('chatUsers')) {
+                $query->where(function ($query) use ($authUser) {
+                    $query->whereHas('sentFollowRequests', function ($query) use ($authUser) {
+                        $query->where('receiver_id', $authUser->id)->where('status', 'accepted');
+                    })->orWhereHas('receivedFollowRequests', function ($query) use ($authUser) {
+                        $query->where('sender_id', $authUser->id)->where('status', 'accepted');
+                    });
+                });
+    
                 $users = $query->get();
             }
+
+            $users = $query->get();
 
             return $this->successResponse('Successfully fetched all users', $users, 200);
         } catch (\Exception $e) {

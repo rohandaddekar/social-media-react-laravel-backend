@@ -84,6 +84,8 @@ class ChatController extends Controller
                 'receiver_id' => $request->receiver_id
             ]);
 
+            $message->load(['sender', 'receiver']);
+
             ChatEvent::dispatch($message, 'created');
             
             DB::commit();
